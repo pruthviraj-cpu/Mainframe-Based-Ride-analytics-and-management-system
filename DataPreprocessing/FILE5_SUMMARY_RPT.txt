@@ -1,0 +1,16 @@
+================================================================================
+      MAINFRAME-BASED RIDE ANALYTICS & MANAGEMENT SYSTEM - COBOL RIDEANLZ       
+================================================================================
+
+  TOTAL CLEAN TRIPS PROCESSED:              90
+  TOTAL FRAUDULENT TRIPS FLAGGED:             0
+  TOTAL PLATFORM COMMISSION (25%):  $    379.23
+  TOTAL DRIVER DISBURSEMENTS (75%): $   1137.40
+
+--------------------------------------------------------------------------------
+  PREDICTIVE ANALYTICS: TOP 3 HOTTEST DROPOFF ZONES (DRIVER ALLOCATION ADVISORY)
+--------------------------------------------------------------------------------
+  RANK 1: ZONE ID 048 - 8 DROPOFFS (SURGE ALLOCATION RECOMMENDED)
+  RANK 2: ZONE ID 239 - 5 DROPOFFS (SURGE ALLOCATION RECOMMENDED)
+  RANK 3: ZONE ID 238 - 5 DROPOFFS (SURGE ALLOCATION RECOMMENDED)
+================================================================================
