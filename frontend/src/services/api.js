@@ -21,8 +21,9 @@ import {
 // Backend endpoint base URL (FastAPI default)
 export const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "http://127.0.0.1:8000/api";
 
-// Set to 'false' once your FastAPI backend is running!
-export const USE_MOCK = import.meta.env.VITE_USE_MOCK !== "false";
+// Defaults to false so it connects directly to live FastAPI!
+// If backend is ever offline, it gracefully falls back without crashing.
+export const USE_MOCK = import.meta.env.VITE_USE_MOCK === "true";
 
 /**
  * Helper to fetch from FastAPI with timeout and automatic fallback to mock data
