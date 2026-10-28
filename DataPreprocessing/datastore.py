@@ -156,11 +156,23 @@ def parse_fraud_record(line: str) -> dict:
     return {
         "trip_id": trip_id,
         "driver_id": driver_id,
+        "driver_name": f"Driver {driver_id}",
+        "timestamp": "Batch Audit Entry",
+        "raw_timestamp": "",
+        "pickup_zone_id": "000",
+        "dropoff_zone_id": "000",
+        "pickup_zone": "Quarantined (Audit)",
+        "dropoff_zone": "Quarantined (Audit)",
         "fraud_reason": reason,
         "distance_miles": round(dist, 2),
         "fare_usd": round(fare, 2),
+        "driver_payout_usd": 0.00,
+        "platform_commission_usd": 0.00,
         "duration_mins": int(round(dur)),
+        "speed_mph": round(speed, 2),
         "implied_speed_mph": round(speed, 2),
+        "status": f"FRAUD: {reason.strip()}",
+        "is_fraud": True,
         "raw_record": rec,
     }
 
@@ -169,7 +181,7 @@ class MainframeDataStore:
     """Direct file-based reader & query provider for mainframe output datasets."""
 
     @staticmethod
-    def get_ledger_trips(search=None, zone_id=None):
+    def get_ledger_trips(search=None, zone_id=None, include_fraud=True):
         if not os.path.exists(FILE3_LEDGER):
             return []
 
@@ -195,6 +207,22 @@ class MainframeDataStore:
                         continue
 
                 trips.append(trip)
+
+        if include_fraud and os.path.exists(FILE4_FRAUD):
+            with open(FILE4_FRAUD, "r", encoding="utf-8") as f:
+                for line in f:
+                    if len(line.strip()) == 0:
+                        continue
+                    fraud_trip = parse_fraud_record(line)
+                    if search:
+                        q = search.lower()
+                        if (
+                            q not in fraud_trip["trip_id"].lower()
+                            and q not in fraud_trip["driver_id"].lower()
+                            and q not in fraud_trip["status"].lower()
+                        ):
+                            continue
+                    trips.append(fraud_trip)
 
         return trips
 

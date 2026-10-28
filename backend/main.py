@@ -77,12 +77,14 @@ def get_summary():
 def get_trips(
     search: Optional[str] = Query(None, description="Search by Trip ID, Driver ID, or Zone"),
     zone: Optional[str] = Query(None, description="Filter by Taxi Zone ID"),
+    include_fraud: bool = Query(True, description="Include fraud records flagged by COBOL"),
 ):
     """
     Returns clean, deduplicated, and merged trips parsed directly from
-    FILE3_MASTER_LEDGER.ps (LRECL=80, RECFM=FB).
+    FILE3_MASTER_LEDGER.ps (LRECL=80, RECFM=FB), optionally including
+    flagged fraud records from FILE4_FRAUD_REPORT.ps.
     """
-    trips = MainframeDataStore.get_ledger_trips(search=search, zone_id=zone)
+    trips = MainframeDataStore.get_ledger_trips(search=search, zone_id=zone, include_fraud=include_fraud)
     return trips
 
 
@@ -183,19 +185,33 @@ def get_mainframe_jobs():
     ]
 
 
+@app.get("/api/pipeline/logs")
+def get_pipeline_logs():
+    """
+    Returns the real-time execution log messages produced by the mainframe batch pipeline.
+    """
+    from DataPreprocessing.process_data import FILE_LOGS
+    if os.path.exists(FILE_LOGS):
+        with open(FILE_LOGS, "r", encoding="utf-8") as f:
+            lines = [line.rstrip("\r\n") for line in f if len(line.strip()) > 0]
+        return {"status": "success", "logs": lines}
+    return {"status": "idle", "logs": ["Mainframe Spool Idle. Click 'Run Pipeline' to trigger batch processing."]}
+
+
 @app.post("/api/pipeline/run")
 def trigger_pipeline():
     """
     On-demand batch pipeline trigger:
     Re-runs the JCL, REXX, and COBOL algorithms against the current input files,
-    refreshes all .ps datasets, and returns the newly produced summary.
+    refreshes all .ps datasets, and returns the newly produced summary and execution logs.
     """
     try:
-        run_batch_pipeline()
+        logs = run_batch_pipeline()
         return {
             "status": "success",
             "message": "Mainframe batch pipeline executed successfully.",
             "return_code": "RC=0000",
+            "logs": logs,
             "metrics": MainframeDataStore.get_summary_metrics(),
         }
     except Exception as e:

@@ -6,6 +6,7 @@ import TripDetailModal from './components/TripDetailModal';
 import DriversView from './components/DriversView';
 import AnalyticsView from './components/AnalyticsView';
 import MainframePipelineView from './components/MainframePipelineView';
+import MainframeConsoleView from './components/MainframeConsoleView';
 
 import {
   getDashboardSummary,
@@ -17,11 +18,11 @@ import {
   USE_MOCK,
 } from './services/api';
 
-import { List, Users, BarChart3, GitFork, CheckCircle2 } from 'lucide-react';
+import { List, Users, BarChart3, GitFork, Terminal, CheckCircle2 } from 'lucide-react';
 import './App.css';
 
 export default function App() {
-  const [activeTab, setActiveTab] = useState('trips'); // 'trips' | 'drivers' | 'analytics' | 'pipeline'
+  const [activeTab, setActiveTab] = useState('trips'); // 'trips' | 'drivers' | 'analytics' | 'pipeline' | 'console'
   const [summary, setSummary] = useState(null);
   const [trips, setTrips] = useState([]);
   const [drivers, setDrivers] = useState([]);
@@ -118,6 +119,16 @@ export default function App() {
               <GitFork size={15} />
               <span>Mainframe Pipeline</span>
             </button>
+
+            <button
+              type="button"
+              className={`tab-btn ${activeTab === 'console' ? 'active' : ''}`}
+              onClick={() => setActiveTab('console')}
+            >
+              <Terminal size={15} />
+              <span>Live Console Spool</span>
+              <span className="live-pulse-badge">LIVE</span>
+            </button>
           </div>
 
           <div className="tabs-right-meta text-muted">
@@ -129,7 +140,7 @@ export default function App() {
 
         {/* Tab View Content */}
         {activeTab === 'trips' && (
-          <TripsTable trips={trips} onSelectTrip={(t) => setSelectedTrip(t)} />
+          <TripsTable trips={trips} summary={summary} onSelectTrip={(t) => setSelectedTrip(t)} />
         )}
 
         {activeTab === 'drivers' && (
@@ -141,7 +152,15 @@ export default function App() {
         )}
 
         {activeTab === 'pipeline' && (
-          <MainframePipelineView jobs={jobs} summary={summary} />
+          <MainframePipelineView
+            jobs={jobs}
+            summary={summary}
+            onOpenConsole={() => setActiveTab('console')}
+          />
+        )}
+
+        {activeTab === 'console' && (
+          <MainframeConsoleView onPipelineFinished={loadDashboardData} />
         )}
       </main>
 

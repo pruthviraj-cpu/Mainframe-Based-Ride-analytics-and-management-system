@@ -126,6 +126,60 @@ export async function getMainframeJobs() {
 }
 
 /**
+ * 7. Fetch Real-Time Mainframe Batch Spool Logs
+ * Expected Backend Endpoint: GET /api/pipeline/logs
+ */
+export async function getPipelineLogs() {
+  return fetchWithFallback("/pipeline/logs", {
+    status: "success",
+    logs: [
+      "JOB04821 $HASP373 MASTERWF STARTED - CLASS A - IBM z/OS BATCH ENGINE",
+      "[STEP 00] //CLEANUP EXEC PGM=IEFBR14 - RC=0000",
+      "[STEP 01] //SORTF1 EXEC PGM=SORT (SORTF1.jcl) - 10 duplicate rows purged by SUM FIELDS=NONE - RC=0000",
+      "[STEP 02] //REXXF2 EXEC PGM=IKJEFT01 (DEDUPF2.rexx) - 15 duplicates purged - QuickSort completed - RC=0000",
+      "[STEP 03] //RUNCOBOL EXEC PGM=RIDEANLZ - Balance-Line match - 90 ledger rows - 0 fraud flags - RC=0000",
+      "[STEP 04] //SURGSTEP EXEC PGM=IKJEFT01 (SURGEPRC.rexx) - Zone demand matrix generated - RC=0000",
+      "[STEP 05] //BACKUP EXEC PGM=IEBGENER - Dataset backup archived - RC=0000",
+      "JOB04821 $HASP395 MASTERWF ENDED - MAX RETURN CODE RC=0000 (SUCCESS)",
+    ],
+  });
+}
+
+/**
+ * 8. Trigger Live Mainframe Pipeline Execution
+ * Expected Backend Endpoint: POST /api/pipeline/run
+ */
+export async function triggerPipelineExecution() {
+  if (USE_MOCK) {
+    await new Promise((resolve) => setTimeout(resolve, 600));
+    return {
+      status: "success",
+      message: "Mainframe batch pipeline executed successfully (Mock Emulation).",
+      return_code: "RC=0000",
+      source: "mock",
+    };
+  }
+
+  try {
+    const res = await fetch(`${API_BASE_URL}/pipeline/run`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+    });
+    if (!res.ok) throw new Error(`HTTP ${res.status}: ${res.statusText}`);
+    const data = await res.json();
+    return { ...data, source: "live" };
+  } catch (err) {
+    console.warn("[API] Trigger pipeline fallback to mock simulation:", err);
+    return {
+      status: "success",
+      message: "Mainframe batch pipeline simulated (Offline mode).",
+      return_code: "RC=0000",
+      source: "mock_fallback",
+    };
+  }
+}
+
+/**
  * Check if the backend is currently alive
  * Expected Backend Endpoint: GET /api/health
  */
