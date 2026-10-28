@@ -1771,6 +1771,23 @@
   border: 1px solid #BAE6FD;
 }
 
+.log-source-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--text-secondary);
+  background-color: #F1F5F9;
+  padding: 2px 8px;
+  border-radius: var(--radius-full);
+  border: 1px solid var(--border-light);
+}
+
+.log-source-tag svg {
+  color: #059669;
+}
+
 .console-actions {
   display: flex;
   align-items: center;
