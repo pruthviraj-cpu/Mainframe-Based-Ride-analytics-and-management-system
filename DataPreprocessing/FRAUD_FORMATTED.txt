@@ -1,0 +1,13 @@
+================================================================================
+              NYC TAXI FRAUD INVESTIGATION & AUDIT REPORT
+           System: IBM z/OS 05.29.00 | Program: RIDEANLZ Fraud Engine
+================================================================================
+ TRIP ID  | DRIVER   | FRAUD FLAG   | DISTANCE | FARE     | DURATION | SPEED    
+--------------------------------------------------------------------------------
+--------------------------------------------------------------------------------
+ AUDIT SUMMARY & ACTION TAKEN:
+ - Flagged Trip TR000076 exceeded maximum safety threshold (> 85.0 MPH).
+ - Calculated implied speed: 999.9 MPH (Distance 0.04 mi in < 0.01 mins).
+ - ACTION: Intercepted by Balance-Line matching engine.
+ - STATUS: ZERO payout disbursed to DRV95086. Platform loss prevented.
+================================================================================

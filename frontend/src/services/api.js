@@ -207,10 +207,10 @@ export async function getPipelineLogs() {
 }
 
 /**
- * 8. Trigger Live Mainframe Pipeline Execution
+ * 8. Trigger Live Mainframe Pipeline Execution (Optionally with Config)
  * Expected Backend Endpoint: POST /api/pipeline/run
  */
-export async function triggerPipelineExecution() {
+export async function triggerPipelineExecution(config = null) {
   if (USE_MOCK) {
     await new Promise((resolve) => setTimeout(resolve, 300));
     return {
@@ -226,6 +226,7 @@ export async function triggerPipelineExecution() {
     const res = await fetch(`${API_BASE_URL}/pipeline/run`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
+      body: config ? JSON.stringify(config) : undefined,
     });
     if (!res.ok) throw new Error(`HTTP ${res.status}: ${res.statusText}`);
     const data = await res.json();
@@ -239,6 +240,70 @@ export async function triggerPipelineExecution() {
       logs: REAL_MAINFRAME_LOGS,
       source: "mock_fallback",
     };
+  }
+}
+
+/**
+ * 9. Upload Custom Input Datasets (FILE1 Trip Data and/or FILE2 Driver Data)
+ * Expected Backend Endpoint: POST /api/upload-files (multipart/form-data)
+ */
+export async function uploadInputFiles({ file1, file2, speedThreshold = 85, minFareThreshold = 5, minFareDist = 10 }) {
+  if (USE_MOCK) {
+    await new Promise((resolve) => setTimeout(resolve, 400));
+    return {
+      status: "success",
+      message: "Custom datasets uploaded and processed (Mock mode).",
+      return_code: "RC=0000",
+      source: "mock",
+    };
+  }
+
+  try {
+    const formData = new FormData();
+    if (file1) formData.append("file1", file1);
+    if (file2) formData.append("file2", file2);
+    formData.append("speed_threshold", speedThreshold);
+    formData.append("min_fare_threshold", minFareThreshold);
+    formData.append("min_fare_dist", minFareDist);
+
+    const res = await fetch(`${API_BASE_URL}/upload-files`, {
+      method: "POST",
+      body: formData,
+    });
+
+    if (!res.ok) throw new Error(`Upload error HTTP ${res.status}: ${res.statusText}`);
+    const data = await res.json();
+    return { ...data, source: "live" };
+  } catch (err) {
+    console.error("[API] Failed to upload files to backend:", err);
+    throw err;
+  }
+}
+
+/**
+ * 10. Load Benchmark Dataset Scenario (standard vs high_fraud)
+ * Expected Backend Endpoint: POST /api/load-sample?preset=...
+ */
+export async function loadSamplePreset(preset = "standard") {
+  if (USE_MOCK) {
+    await new Promise((resolve) => setTimeout(resolve, 300));
+    return {
+      status: "success",
+      message: `Loaded ${preset} scenario (Mock mode).`,
+      source: "mock",
+    };
+  }
+
+  try {
+    const res = await fetch(`${API_BASE_URL}/load-sample?preset=${encodeURIComponent(preset)}`, {
+      method: "POST",
+    });
+    if (!res.ok) throw new Error(`Sample load HTTP ${res.status}: ${res.statusText}`);
+    const data = await res.json();
+    return { ...data, source: "live" };
+  } catch (err) {
+    console.error("[API] Failed to load sample preset:", err);
+    throw err;
   }
 }
 

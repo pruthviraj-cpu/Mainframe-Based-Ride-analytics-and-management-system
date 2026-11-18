@@ -3,6 +3,7 @@ import Header from './components/Header';
 import StatCards from './components/StatCards';
 import TripsTable from './components/TripsTable';
 import TripDetailModal from './components/TripDetailModal';
+import FileUploadModal from './components/FileUploadModal';
 import DriversView from './components/DriversView';
 import AnalyticsView from './components/AnalyticsView';
 import MainframePipelineView from './components/MainframePipelineView';
@@ -32,6 +33,14 @@ export default function App() {
   const [selectedTrip, setSelectedTrip] = useState(null);
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [apiSource, setApiSource] = useState('mock');
+  const [isUploadOpen, setIsUploadOpen] = useState(false);
+  const [activeZoneFilter, setActiveZoneFilter] = useState(null);
+
+  // Switch to Trips tab with zone filter when clicking map or zone charts
+  const handleZoneSelect = (zoneIdOrName) => {
+    setActiveZoneFilter(zoneIdOrName);
+    setActiveTab('trips');
+  };
 
   // Load all initial data from API service
   const loadDashboardData = async () => {
@@ -72,6 +81,7 @@ export default function App() {
         onRefresh={loadDashboardData}
         isRefreshing={isRefreshing}
         apiSource={apiSource}
+        onOpenUpload={() => setIsUploadOpen(true)}
       />
 
       {/* Main Container */}
@@ -140,7 +150,13 @@ export default function App() {
 
         {/* Tab View Content */}
         {activeTab === 'trips' && (
-          <TripsTable trips={trips} summary={summary} onSelectTrip={(t) => setSelectedTrip(t)} />
+          <TripsTable
+            trips={trips}
+            summary={summary}
+            onSelectTrip={(t) => setSelectedTrip(t)}
+            activeZoneFilter={activeZoneFilter}
+            onClearZoneFilter={() => setActiveZoneFilter(null)}
+          />
         )}
 
         {activeTab === 'drivers' && (
@@ -148,7 +164,13 @@ export default function App() {
         )}
 
         {activeTab === 'analytics' && (
-          <AnalyticsView hourlyData={hourlyData} zoneData={zoneData} />
+          <AnalyticsView
+            hourlyData={hourlyData}
+            zoneData={zoneData}
+            summary={summary}
+            onSelectZone={handleZoneSelect}
+            onPipelineRerun={loadDashboardData}
+          />
         )}
 
         {activeTab === 'pipeline' && (
@@ -163,6 +185,13 @@ export default function App() {
           <MainframeConsoleView onPipelineFinished={loadDashboardData} />
         )}
       </main>
+
+      {/* File Ingestion Modal */}
+      <FileUploadModal
+        isOpen={isUploadOpen}
+        onClose={() => setIsUploadOpen(false)}
+        onSuccess={loadDashboardData}
+      />
 
       {/* 80-Byte Record Inspector Modal */}
       {selectedTrip && (

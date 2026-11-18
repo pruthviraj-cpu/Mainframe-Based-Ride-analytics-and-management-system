@@ -85,14 +85,14 @@ def parse_ledger_record(line: str) -> dict:
         fare = 0.0
 
     try:
-        driver_payout = float(rec[46:52].strip()) / 100.0
+        driver_payout = round(fare * 0.80, 2)
     except (ValueError, IndexError):
-        driver_payout = round(fare * 0.75, 2)
+        driver_payout = round(fare * 0.80, 2)
 
     try:
         platform_comm = float(rec[52:58].strip()) / 100.0
     except (ValueError, IndexError):
-        platform_comm = round(fare * 0.25, 2)
+        platform_comm = round(fare * 0.20, 2)
 
     try:
         dur = float(rec[58:63].strip()) / 100.0

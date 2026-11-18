@@ -26,7 +26,7 @@ FILE_SURGE = os.path.join(BASE_DIR, "RIDE_SURGE_REPORT.txt")
 FILE_LOGS = os.path.join(BASE_DIR, "MAINFRAME_BATCH.log")
 
 
-def run_batch_pipeline():
+def run_batch_pipeline(speed_threshold: float = 85.0, min_fare_threshold: float = 5.0, min_fare_dist: float = 10.0):
     logs = []
     def log(msg):
         print(msg)
@@ -198,16 +198,16 @@ def run_batch_pipeline():
             is_fraud = False
             fraud_reason = "            "
 
-            if speed_mph > 85.0:
+            if speed_mph > speed_threshold:
                 is_fraud = True
                 fraud_reason = "SPEED>85MPH "
-            elif distance_float > 10.0 and fare_float < 5.0:
+            elif distance_float > min_fare_dist and fare_float < min_fare_threshold:
                 is_fraud = True
                 fraud_reason = "LOW-FARE    "
 
             fare_dec = Decimal(str(round(fare_float, 2)))
-            payout_dec = (fare_dec * Decimal("0.75")).quantize(Decimal("0.01"), rounding=ROUND_HALF_UP)
-            platform_dec = (fare_dec * Decimal("0.25")).quantize(Decimal("0.01"), rounding=ROUND_HALF_UP)
+            payout_dec = (fare_dec * Decimal("0.80")).quantize(Decimal("0.01"), rounding=ROUND_HALF_UP)
+            platform_dec = (fare_dec * Decimal("0.20")).quantize(Decimal("0.01"), rounding=ROUND_HALF_UP)
 
             # Format COBOL numeric PIC fields
             dist_int = int(round(distance_float * 100))
@@ -300,8 +300,8 @@ def run_batch_pipeline():
         f.write("=" * 80 + "\n\n")
         f.write(f"  TOTAL CLEAN TRIPS PROCESSED:      {total_trips_processed:>10}\n")
         f.write(f"  TOTAL FRAUDULENT TRIPS FLAGGED:    {total_fraud_trips:>10}\n")
-        f.write(f"  TOTAL PLATFORM COMMISSION (25%):  ${total_platform_revenue:>10.2f}\n")
-        f.write(f"  TOTAL DRIVER DISBURSEMENTS (75%): ${total_driver_payout:>10.2f}\n\n")
+        f.write(f"  TOTAL PLATFORM COMMISSION (20%):  ${total_platform_revenue:>10.2f}\n")
+        f.write(f"  TOTAL DRIVER DISBURSEMENTS (80%): ${total_driver_payout:>10.2f}\n\n")
         f.write("-" * 80 + "\n")
         f.write("  PREDICTIVE ANALYTICS: TOP 3 HOTTEST DROPOFF ZONES (DRIVER ALLOCATION ADVISORY)\n")
         f.write("-" * 80 + "\n")

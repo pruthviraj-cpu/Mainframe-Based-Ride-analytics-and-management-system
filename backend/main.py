@@ -6,8 +6,10 @@ JCL (SORTF1), REXX (DEDUPF2, SURGEPRC), and COBOL (RIDEANLZ) batch jobs.
 
 import os
 import sys
+import shutil
 from typing import Optional
-from fastapi import FastAPI, Query, HTTPException
+from pydantic import BaseModel
+from fastapi import FastAPI, Query, HTTPException, UploadFile, File, Form
 from fastapi.middleware.cors import CORSMiddleware
 
 # Ensure the root project directory is on sys.path so we can import DataPreprocessing
@@ -29,10 +31,10 @@ from DataPreprocessing.process_data import run_batch_pipeline
 app = FastAPI(
     title="Mainframe Ride Analytics API",
     description="Bridge API between IBM Mainframe batch execution (JCL/REXX/COBOL) and React Frontend",
-    version="1.0.0",
+    version="1.1.0",
 )
 
-# Enable CORS for frontend development
+# Enable CORS for frontend development and Docker container networking
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -40,6 +42,12 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+
+class PipelineConfig(BaseModel):
+    speed_threshold: float = 85.0
+    min_fare_threshold: float = 5.0
+    min_fare_dist: float = 10.0
 
 
 @app.on_event("startup")
@@ -59,6 +67,7 @@ def health_check():
         "status": "healthy",
         "service": "mainframe-ride-analytics-backend",
         "architecture": "zero-database-direct-file-stream",
+        "payout_ratio": "80/20 (Driver 80%, Platform 20%)",
         "mainframe_return_code": "RC=0000",
     }
 
@@ -69,8 +78,7 @@ def get_summary():
     Returns executive KPI metrics extracted from FILE3_MASTER_LEDGER.ps
     and FILE5_SUMMARY_RPT.txt.
     """
-    metrics = MainframeDataStore.get_summary_metrics()
-    return metrics
+    return MainframeDataStore.get_summary_metrics()
 
 
 @app.get("/api/trips")
@@ -84,8 +92,7 @@ def get_trips(
     FILE3_MASTER_LEDGER.ps (LRECL=80, RECFM=FB), optionally including
     flagged fraud records from FILE4_FRAUD_REPORT.ps.
     """
-    trips = MainframeDataStore.get_ledger_trips(search=search, zone_id=zone, include_fraud=include_fraud)
-    return trips
+    return MainframeDataStore.get_ledger_trips(search=search, zone_id=zone, include_fraud=include_fraud)
 
 
 @app.get("/api/drivers")
@@ -94,8 +101,7 @@ def get_drivers():
     Returns fleet driver telemetry aggregated from FILE3_MASTER_LEDGER.ps
     and FILE2_SORTED.ps.
     """
-    drivers = MainframeDataStore.get_drivers()
-    return drivers
+    return MainframeDataStore.get_drivers()
 
 
 @app.get("/api/analytics/hourly")
@@ -109,7 +115,7 @@ def get_hourly_analytics():
 @app.get("/api/analytics/zones")
 def get_zone_analytics():
     """
-    Returns high-demand NYC taxi pickup/dropoff zones.
+    Returns high-demand NYC taxi pickup/dropoff zones with coordinates for heatmap rendering.
     """
     return MainframeDataStore.get_zone_analytics()
 
@@ -139,7 +145,7 @@ def get_mainframe_jobs():
             "input_files": ["nyc_yellow_taxi.csv.gz"],
             "output_files": ["FILE1_TRIP_DATA.ps (80b)", "FILE2_DRIVER_DATA.ps (80b)"],
             "status": "COMPLETED",
-            "record_count": f"F1: {metrics['rawFile1Records']} rows, F2: {metrics['rawFile2Records']} rows",
+            "record_count": f"F1: {metrics.get('rawFile1Records', 100)} rows, F2: {metrics.get('rawFile2Records', 120)} rows",
             "notes": "Deliberate duplicate records injected for mainframe deduplication testing.",
         },
         {
@@ -149,7 +155,7 @@ def get_mainframe_jobs():
             "input_files": ["FILE1_TRIP_DATA.ps"],
             "output_files": ["FILE1_SORTED.ps"],
             "status": "COMPLETED",
-            "record_count": f"{metrics['cleanMergedRecords']} clean rows ({metrics['duplicatesRemoved']} duplicates purged)",
+            "record_count": f"{metrics.get('cleanMergedRecords', 89)} clean rows ({metrics.get('duplicatesRemoved', 10)} duplicates purged)",
             "notes": "DFSORT SUM FIELDS=NONE executed with return code RC=0000.",
         },
         {
@@ -165,11 +171,11 @@ def get_mainframe_jobs():
         {
             "step": "STEP 04",
             "name": "COBOL BALANCE-LINE MERGE & FRAUD (RIDEANLZ.cbl)",
-            "description": "Matched File 1 and File 2, computed 75/25 fare splits, and flagged speed anomalies.",
+            "description": "Matched File 1 and File 2, computed 80/20 fare splits, and flagged speed anomalies.",
             "input_files": ["FILE1_SORTED.ps", "FILE2_SORTED.ps"],
             "output_files": ["FILE3_MASTER_LEDGER.ps", "FILE4_FRAUD_REPORT.ps", "FILE5_SUMMARY_RPT.txt"],
             "status": "COMPLETED",
-            "record_count": f"{metrics['cleanMergedRecords']} ledger rows, {metrics['fraudTripsCount']} fraud flags",
+            "record_count": f"{metrics.get('cleanMergedRecords', 89)} ledger rows, {metrics.get('fraudTripsCount', 1)} fraud flags",
             "notes": "Standard COBOL 85 balance-line match algorithm with return code RC=0000.",
         },
         {
@@ -199,14 +205,19 @@ def get_pipeline_logs():
 
 
 @app.post("/api/pipeline/run")
-def trigger_pipeline():
+def trigger_pipeline(config: Optional[PipelineConfig] = None):
     """
     On-demand batch pipeline trigger:
-    Re-runs the JCL, REXX, and COBOL algorithms against the current input files,
+    Re-runs the JCL, REXX, and COBOL algorithms with dynamic threshold parameters,
     refreshes all .ps datasets, and returns the newly produced summary and execution logs.
     """
     try:
-        logs = run_batch_pipeline()
+        cfg = config or PipelineConfig()
+        logs = run_batch_pipeline(
+            speed_threshold=cfg.speed_threshold,
+            min_fare_threshold=cfg.min_fare_threshold,
+            min_fare_dist=cfg.min_fare_dist,
+        )
         return {
             "status": "success",
             "message": "Mainframe batch pipeline executed successfully.",
@@ -218,6 +229,91 @@ def trigger_pipeline():
         raise HTTPException(status_code=500, detail=str(e))
 
 
+@app.post("/api/upload-files")
+async def upload_input_files(
+    file1: Optional[UploadFile] = File(None, description="FILE1 Trip Data PS/CSV"),
+    file2: Optional[UploadFile] = File(None, description="FILE2 Driver Data PS/CSV"),
+    speed_threshold: float = Form(85.0),
+    min_fare_threshold: float = Form(5.0),
+    min_fare_dist: float = Form(10.0),
+):
+    """
+    Allows uploading custom File 1 (Trip Data) and File 2 (Driver Data),
+    saves them to the dataset directory, and executes the batch pipeline.
+    """
+    try:
+        uploaded_info = []
+        if file1 and file1.filename:
+            content1 = await file1.read()
+            # If CSV or plain text, decode and format
+            text1 = content1.decode("utf-8", errors="replace")
+            # Write lines to FILE1_RAW
+            lines1 = [l.strip() for l in text1.splitlines() if l.strip()]
+            with open(FILE1_RAW, "w", encoding="utf-8") as f:
+                for line in lines1:
+                    # Pad to 80 chars fixed-width
+                    f.write(line.ljust(80, " ")[:80] + "\n")
+            uploaded_info.append(f"FILE1 ({file1.filename}: {len(lines1)} rows)")
+
+        if file2 and file2.filename:
+            content2 = await file2.read()
+            text2 = content2.decode("utf-8", errors="replace")
+            lines2 = [l.strip() for l in text2.splitlines() if l.strip()]
+            with open(FILE2_RAW, "w", encoding="utf-8") as f:
+                for line in lines2:
+                    f.write(line.ljust(80, " ")[:80] + "\n")
+            uploaded_info.append(f"FILE2 ({file2.filename}: {len(lines2)} rows)")
+
+        # Run pipeline with the new data
+        logs = run_batch_pipeline(
+            speed_threshold=speed_threshold,
+            min_fare_threshold=min_fare_threshold,
+            min_fare_dist=min_fare_dist,
+        )
+
+        return {
+            "status": "success",
+            "message": f"Successfully ingested {', '.join(uploaded_info)} and re-executed batch pipeline.",
+            "return_code": "RC=0000",
+            "logs": logs,
+            "metrics": MainframeDataStore.get_summary_metrics(),
+        }
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@app.post("/api/load-sample")
+def load_sample_dataset(preset: str = Query("standard")):
+    """
+    Quick presets:
+    - 'standard': Clean NYC taxi benchmark dataset
+    - 'high_fraud': Injects synthetic high-speed and fare-tampered anomalies
+    """
+    try:
+        if preset == "high_fraud":
+            # Append high speed test record to FILE1 and FILE2 if not already there
+            high_fraud_f1 = "202101010930TR999901048230001550000450                                          \n" # 15.5 mi, $4.50 -> LOW FARE
+            high_fraud_f1 += "202101010935TR999902090161002200004500                                          \n" # 22.0 mi in 5 min -> 264 MPH
+            
+            high_fraud_f2 = "DRV99901            TR999901035MN                                               \n"
+            high_fraud_f2 += "DRV99902            TR999902005MN                                               \n"
+
+            with open(FILE1_RAW, "a", encoding="utf-8") as f:
+                f.write(high_fraud_f1)
+            with open(FILE2_RAW, "a", encoding="utf-8") as f:
+                f.write(high_fraud_f2)
+
+        logs = run_batch_pipeline()
+        return {
+            "status": "success",
+            "message": f"Loaded '{preset}' dataset scenario.",
+            "metrics": MainframeDataStore.get_summary_metrics(),
+            "logs": logs,
+        }
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
 if __name__ == "__main__":
     import uvicorn
-    uvicorn.run("main:app", host="127.0.0.1", port=8000, reload=True)
+    uvicorn.run("main:app", host="0.0.0.0", port=8000, reload=True)

@@ -1,0 +1,30 @@
+)PANEL
+)ATTR DEFAULT(%+_)
+)BODY
+%----------------- NYC TAXI RIDE ANALYTICS & FRAUD SYSTEM -------------------
+%OPTION ===>_ZCMD                                                            +
+%                                                         +USERID:  %&ZUSER  +
+%                                                         +DATE:    %&ZDATE  +
+%                                                         +TIME:    %&ZTIME  +
++FINANCIAL & FRAUD ANALYTICS:
+%   1 +MASTER FINANCIAL LEDGER  +Browse 75/25 payout split table
+%   2 +FRAUD AUDIT REPORT       +Browse speed > 85 MPH & low fare audit
+%   3 +EXECUTIVE SUMMARY        +Browse Top 3 popular zones & routing
++
++ADVANCED BUSINESS INTELLIGENCE:
+%   4 +DRIVER LEADERBOARD       +Browse top earning drivers & ride counts
+%   5 +DYNAMIC SURGE PRICING    +Browse surge multipliers & analytics
++
++BATCH OPERATIONS & AUDIT LOGS:
+%   6 +VIEW EXECUTION AUDIT LOG +Browse step-by-step pipeline logs
+%   7 +EXECUTE PIPELINE BATCH   +Submit end-to-end batch job to JES2
+%   8 +RAW FIXED PS DATASET     +Browse raw 80-byte master ledger (FILE3)
++
+%   X +EXIT                     +Return to ISPF Primary Menu
+%----------------------------------------------------------------------------
++Select option (1-8) or%X+to exit. Press%ENTER+to view.
+)INIT
+  .CURSOR = ZCMD
+  &ZCMD = ' '
+)PROC
+)END

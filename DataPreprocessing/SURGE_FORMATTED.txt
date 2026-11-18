@@ -1,0 +1,15 @@
+================================================================================
+              DYNAMIC SURGE PRICING SIMULATION REPORT
+           Module: SURGEPRC.rexx | High Demand Dropoff Zones
+================================================================================
+ ZONE ID | ZONE NAME / BOROUGH       | DEMAND LEVEL | MULTIPLIER | AVG SURGE FAR
+--------------------------------------------------------------------------------
+   048   | Clinton East (Manhattan)  | CRITICAL     |   2.00x    |    $ 19.60   
+   238   | Upper West Side North     | HIGH         |   1.50x    |    $ 24.75   
+   239   | Upper West Side South     | HIGH         |   1.50x    |    $ 27.75   
+   050   | Clinton West              | MODERATE     |   1.25x    |    $ 19.12   
+   140   | Lenox Hill East           | MODERATE     |   1.25x    |    $ 14.75   
+--------------------------------------------------------------------------------
+ RECOMMENDATION: ALLOCATE IDLE DRIVERS TO ZONE 048 (HIGHEST SURGE POTENTIAL)
+ PROJECTED REVENUE INCREASE: +38.4% WITH DYNAMIC SURGE DISPATCH
+================================================================================

@@ -111,8 +111,8 @@ export function generateRidesPdfReport(trips = [], summary = {}, activeFilters =
   // ---------------------------------------------------------------------------
   const totalRides = trips.length;
   const totalRevenue = trips.reduce((sum, t) => sum + (Number(t.fare_usd) || 0), 0);
-  const totalPayout = trips.reduce((sum, t) => sum + (Number(t.driver_payout_usd) || (Number(t.fare_usd) || 0) * 0.75), 0);
-  const totalComm = trips.reduce((sum, t) => sum + (Number(t.platform_commission_usd) || (Number(t.fare_usd) || 0) * 0.25), 0);
+  const totalPayout = trips.reduce((sum, t) => sum + (Number(t.driver_payout_usd) || (Number(t.fare_usd) || 0) * 0.80), 0);
+  const totalComm = trips.reduce((sum, t) => sum + (Number(t.platform_commission_usd) || (Number(t.fare_usd) || 0) * 0.20), 0);
   const avgDistance = totalRides > 0 ? (trips.reduce((sum, t) => sum + (Number(t.distance_miles) || 0), 0) / totalRides).toFixed(2) : "0.00";
   const avgSpeed = totalRides > 0 ? (trips.reduce((sum, t) => sum + (Number(t.speed_mph) || 0), 0) / totalRides).toFixed(1) : "0.0";
   const fraudCount = trips.filter(t => t.status && t.status.toLowerCase().includes("fraud")).length;
@@ -122,8 +122,8 @@ export function generateRidesPdfReport(trips = [], summary = {}, activeFilters =
 
   const kpis = [
     { label: "TOTAL GROSS FARE", val: `$${totalRevenue.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`, sub: `${totalRides} trips processed` },
-    { label: "DRIVER PAYOUT (75%)", val: `$${totalPayout.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`, sub: "Disbursed to fleet" },
-    { label: "PLATFORM FEE (25%)", val: `$${totalComm.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`, sub: "Net platform revenue" },
+    { label: "DRIVER PAYOUT (80%)", val: `$${totalPayout.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`, sub: "Disbursed to fleet" },
+    { label: "PLATFORM FEE (20%)", val: `$${totalComm.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`, sub: "Net platform revenue" },
     { label: "FLEET AVERAGES", val: `${avgDistance} mi • ${avgSpeed} mph`, sub: fraudCount > 0 ? `${fraudCount} fraud flagged` : "0 fraud anomalies" },
   ];
 
@@ -163,8 +163,8 @@ export function generateRidesPdfReport(trips = [], summary = {}, activeFilters =
       "Dropoff Zone",
       "Dist (mi)",
       "Fare ($)",
-      "Payout (75%)",
-      "Comm (25%)",
+      "Payout (80%)",
+      "Comm (20%)",
       "Duration",
       "Speed",
       "Status",
@@ -173,8 +173,8 @@ export function generateRidesPdfReport(trips = [], summary = {}, activeFilters =
 
   const tableRows = trips.map((t) => {
     const fare = Number(t.fare_usd) || 0;
-    const payout = Number(t.driver_payout_usd) || fare * 0.75;
-    const comm = Number(t.platform_commission_usd) || fare * 0.25;
+    const payout = Number(t.driver_payout_usd) || fare * 0.80;
+    const comm = Number(t.platform_commission_usd) || fare * 0.20;
     const dist = Number(t.distance_miles) || 0;
     const dur = t.duration_mins ? `${t.duration_mins}m` : "N/A";
     const speed = t.speed_mph ? `${Number(t.speed_mph).toFixed(1)} mph` : "N/A";

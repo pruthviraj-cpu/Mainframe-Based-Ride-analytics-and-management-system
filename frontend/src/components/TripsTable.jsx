@@ -22,9 +22,9 @@ import {
 } from 'lucide-react';
 import { generateRidesPdfReport } from '../services/pdfReportGenerator';
 
-export default function TripsTable({ trips = [], summary = {}, onSelectTrip }) {
+export default function TripsTable({ trips = [], summary = {}, onSelectTrip, activeZoneFilter, onClearZoneFilter }) {
   // --- Filter State Across All Attributes ---
-  const [searchTerm, setSearchTerm] = useState('');
+  const [searchTerm, setSearchTerm] = useState(activeZoneFilter || '');
   const [statusFilter, setStatusFilter] = useState('ALL'); // 'ALL' | 'CLEAN' | 'ALL_FRAUD' | 'FRAUD_SPEED' | 'FRAUD_FARE'
   const [pickupZoneFilter, setPickupZoneFilter] = useState('ALL');
   const [dropoffZoneFilter, setDropoffZoneFilter] = useState('ALL');
@@ -48,6 +48,14 @@ export default function TripsTable({ trips = [], summary = {}, onSelectTrip }) {
   const [isGeneratingPdf, setIsGeneratingPdf] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
   const pageSize = 10;
+
+  // Sync activeZoneFilter if passed externally (e.g. from NYC Map or Top Zones click)
+  React.useEffect(() => {
+    if (activeZoneFilter) {
+      setSearchTerm(activeZoneFilter);
+      setCurrentPage(1);
+    }
+  }, [activeZoneFilter]);
 
   // --- Dynamic Option Lists Extracted from Data ---
   const uniquePickupZones = useMemo(() => {
@@ -138,7 +146,9 @@ export default function TripsTable({ trips = [], summary = {}, onSelectTrip }) {
           (t.driver_id && t.driver_id.toLowerCase().includes(q)) ||
           (t.driver_name && t.driver_name.toLowerCase().includes(q)) ||
           (t.pickup_zone && t.pickup_zone.toLowerCase().includes(q)) ||
-          (t.dropoff_zone && t.dropoff_zone.toLowerCase().includes(q));
+          (t.dropoff_zone && t.dropoff_zone.toLowerCase().includes(q)) ||
+          (t.pickup_zone_id && String(t.pickup_zone_id).toLowerCase().includes(q)) ||
+          (t.dropoff_zone_id && String(t.dropoff_zone_id).toLowerCase().includes(q));
         if (!matchSearch) return false;
       }
 
@@ -299,8 +309,8 @@ export default function TripsTable({ trips = [], summary = {}, onSelectTrip }) {
       'Dropoff_Zone',
       'Distance_Miles',
       'Fare_USD',
-      'Driver_Payout_75',
-      'Platform_Commission_25',
+      'Driver_Payout_80',
+      'Platform_Commission_20',
       'Duration_Mins',
       'Implied_Speed_MPH',
       'Status',
@@ -308,8 +318,8 @@ export default function TripsTable({ trips = [], summary = {}, onSelectTrip }) {
 
     const rows = sortedTrips.map((t) => {
       const fare = Number(t.fare_usd) || 0;
-      const payout = Number(t.driver_payout_usd) || fare * 0.75;
-      const comm = Number(t.platform_commission_usd) || fare * 0.25;
+      const payout = Number(t.driver_payout_usd) || fare * 0.80;
+      const comm = Number(t.platform_commission_usd) || fare * 0.20;
       const speed = Number(t.speed_mph) || 0;
 
       return [
@@ -797,7 +807,7 @@ export default function TripsTable({ trips = [], summary = {}, onSelectTrip }) {
                 className="text-right cursor-pointer"
               >
                 <div className="th-content justify-end">
-                  <span>Payout (75%)</span>
+                  <span>Payout (80%)</span>
                   {sortField === 'driver_payout_usd' && (
                     sortOrder === 'asc' ? <ArrowUp size={12} /> : <ArrowDown size={12} />
                   )}
@@ -850,7 +860,7 @@ export default function TripsTable({ trips = [], summary = {}, onSelectTrip }) {
               paginatedTrips.map((trip) => {
                 const fare = Number(trip.fare_usd) || 0;
                 const payout =
-                  Number(trip.driver_payout_usd) || fare * 0.75;
+                  Number(trip.driver_payout_usd) || fare * 0.80;
                 const speed =
                   Number(trip.speed_mph) ||
                   (trip.duration_mins > 0
