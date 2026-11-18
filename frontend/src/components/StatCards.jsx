@@ -5,8 +5,8 @@ export default function StatCards({ summary }) {
   if (!summary) return null;
 
   const totalRev = Number(summary.totalRevenue) || 0;
-  const driverPayout80 = totalRev * 0.80;
-  const platformComm20 = totalRev * 0.20;
+  const driverPayout75 = Number(summary.driverPayouts) || (totalRev * 0.75);
+  const platformComm25 = Number(summary.platformCommission) || (totalRev * 0.25);
   const fraudCount = Number(summary.fraudTripsCount) || 0;
   const totalTrips = Number(summary.totalTrips) || Number(summary.cleanMergedRecords) || 0;
 
@@ -21,18 +21,18 @@ export default function StatCards({ summary }) {
       accent: 'border-l-4 border-sky-500',
     },
     {
-      title: 'Driver Disbursements (80%)',
-      value: `$${driverPayout80.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`,
-      subtext: '80% Net to active drivers',
+      title: 'Driver Disbursements (75%)',
+      value: `$${driverPayout75.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`,
+      subtext: '75% Net to active drivers',
       icon: Wallet,
       trend: 'positive',
       meta: 'COBOL Calculated',
       accent: 'border-l-4 border-emerald-500',
     },
     {
-      title: 'Platform Commission (20%)',
-      value: `$${platformComm20.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`,
-      subtext: '20% Net platform margin',
+      title: 'Platform Commission (25%)',
+      value: `$${platformComm25.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`,
+      subtext: '25% Net platform margin',
       icon: DollarSign,
       trend: 'positive',
       meta: 'FILE3 Master Ledger',

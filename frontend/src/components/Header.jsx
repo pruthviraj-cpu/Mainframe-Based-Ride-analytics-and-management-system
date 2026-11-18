@@ -19,7 +19,7 @@ export default function Header({ summary, onRefresh, isRefreshing, apiSource, on
             <div className="brand-title-row">
               <h1 className="brand-title">Mainframe Ride Analytics</h1>
               <span className="badge badge-mainframe">IBM z/OS JES2</span>
-              <span className="badge badge-success-light">80/20 Payout</span>
+              <span className="badge badge-success-light">75/25 Payout</span>
             </div>
             <p className="brand-subtitle">
               Enterprise 80-Byte Fixed-Width Ingestion, Balance-Line Processing & Anomaly Intelligence
@@ -32,11 +32,11 @@ export default function Header({ summary, onRefresh, isRefreshing, apiSource, on
           {/* Ingest Datasets Button */}
           <button
             type="button"
-            className="btn btn-sm btn-primary-gradient"
+            className="header-btn header-btn-primary"
             onClick={onOpenUpload}
             title="Upload custom FILE1/FILE2 datasets or benchmark scenarios"
           >
-            <UploadCloud size={15} />
+            <UploadCloud size={16} className="btn-icon" />
             <span>Ingest Datasets</span>
           </button>
 
@@ -52,7 +52,7 @@ export default function Header({ summary, onRefresh, isRefreshing, apiSource, on
               <span className="connection-text">
                 {isLive ? 'FastAPI Connected' : 'Mock Datastore'}
               </span>
-              <Info size={13} className="info-icon" />
+              <Info size={14} className="info-icon" />
             </button>
 
             {/* Connection Info Popover */}
@@ -71,7 +71,7 @@ export default function Header({ summary, onRefresh, isRefreshing, apiSource, on
                 </div>
                 <div className="popover-row">
                   <span className="text-muted">Disbursement Model:</span>
-                  <span className="badge badge-success">80% Driver / 20% Platform</span>
+                  <span className="badge badge-success">75% Driver / 25% Platform</span>
                 </div>
                 <button 
                   className="popover-close-btn"
@@ -84,19 +84,19 @@ export default function Header({ summary, onRefresh, isRefreshing, apiSource, on
           </div>
 
           {/* Last Batch ID */}
-          <div className="batch-meta">
-            <span className="text-muted">Job ID:</span>
-            <span className="mono batch-code">{summary?.batchId || 'JOB09481'}</span>
+          <div className="batch-meta-pill">
+            <span className="batch-label">Job ID:</span>
+            <span className="mono batch-code">{summary?.batchId || 'JOB02023'}</span>
           </div>
 
           {/* Refresh Action */}
           <button 
             type="button" 
-            className={`btn-refresh ${isRefreshing ? 'is-spinning' : ''}`}
+            className={`header-btn header-btn-secondary ${isRefreshing ? 'is-spinning' : ''}`}
             onClick={onRefresh}
             title="Sync all metrics"
           >
-            <RefreshCw size={15} />
+            <RefreshCw size={15} className="btn-icon" />
             <span>Sync</span>
           </button>
         </div>

@@ -19,7 +19,7 @@ import {
   USE_MOCK,
 } from './services/api';
 
-import { List, Users, BarChart3, GitFork, Terminal, CheckCircle2 } from 'lucide-react';
+import { List, Users, BarChart3, GitFork, Terminal, CheckCircle2, Database } from 'lucide-react';
 import './App.css';
 
 export default function App() {
@@ -86,67 +86,71 @@ export default function App() {
 
       {/* Main Container */}
       <main className="main-content">
-        {/* KPI Overview Cards */}
-        <StatCards summary={summary} />
-
-        {/* Navigation Tabs (Segmented Control) */}
-        <div className="tabs-navigation-wrapper">
-          <div className="segmented-control">
+        {/* Primary Dashboard Navigation Bar (Above KPI Overview Cards) */}
+        <nav className="dashboard-navbar" aria-label="Dashboard Navigation">
+          <div className="nav-tabs-group">
             <button
               type="button"
-              className={`tab-btn ${activeTab === 'trips' ? 'active' : ''}`}
+              className={`nav-tab-btn ${activeTab === 'trips' ? 'active' : ''}`}
               onClick={() => setActiveTab('trips')}
             >
-              <List size={15} />
-              <span>Clean Trips Output</span>
-              <span className="tab-badge">{trips.length}</span>
+              <List size={17} className="nav-tab-icon" />
+              <span className="nav-tab-label">Clean Trips Output</span>
+              <span className="nav-tab-badge">{trips.length}</span>
             </button>
 
             <button
               type="button"
-              className={`tab-btn ${activeTab === 'drivers' ? 'active' : ''}`}
+              className={`nav-tab-btn ${activeTab === 'drivers' ? 'active' : ''}`}
               onClick={() => setActiveTab('drivers')}
             >
-              <Users size={15} />
-              <span>Driver Fleet</span>
-              <span className="tab-badge">{drivers.length}</span>
+              <Users size={17} className="nav-tab-icon" />
+              <span className="nav-tab-label">Driver Fleet</span>
+              <span className="nav-tab-badge">{drivers.length}</span>
             </button>
 
             <button
               type="button"
-              className={`tab-btn ${activeTab === 'analytics' ? 'active' : ''}`}
+              className={`nav-tab-btn ${activeTab === 'analytics' ? 'active' : ''}`}
               onClick={() => setActiveTab('analytics')}
             >
-              <BarChart3 size={15} />
-              <span>Demand & Zones</span>
+              <BarChart3 size={17} className="nav-tab-icon" />
+              <span className="nav-tab-label">Demand & Zones</span>
             </button>
 
             <button
               type="button"
-              className={`tab-btn ${activeTab === 'pipeline' ? 'active' : ''}`}
+              className={`nav-tab-btn ${activeTab === 'pipeline' ? 'active' : ''}`}
               onClick={() => setActiveTab('pipeline')}
             >
-              <GitFork size={15} />
-              <span>Mainframe Pipeline</span>
+              <GitFork size={17} className="nav-tab-icon" />
+              <span className="nav-tab-label">Mainframe Pipeline</span>
             </button>
 
             <button
               type="button"
-              className={`tab-btn ${activeTab === 'console' ? 'active' : ''}`}
+              className={`nav-tab-btn ${activeTab === 'console' ? 'active' : ''}`}
               onClick={() => setActiveTab('console')}
             >
-              <Terminal size={15} />
-              <span>Live Console Spool</span>
-              <span className="live-pulse-badge">LIVE</span>
+              <Terminal size={17} className="nav-tab-icon" />
+              <span className="nav-tab-label">Live Console Spool</span>
+              <span className="nav-live-pulse-badge">
+                <span className="live-dot"></span>
+                LIVE
+              </span>
             </button>
           </div>
 
-          <div className="tabs-right-meta text-muted">
-            <span className="mono">LRECL=80, RECFM=FB</span>
-            <span>•</span>
-            <span>z/OS Sequential Data</span>
+          <div className="nav-right-meta">
+            <Database size={15} className="meta-icon" />
+            <span className="mono meta-format">LRECL=80 • RECFM=FB</span>
+            <span className="meta-divider">|</span>
+            <span className="meta-subtext">IBM z/OS Sequential Data</span>
           </div>
-        </div>
+        </nav>
+
+        {/* KPI Overview Cards (Below Navbar) */}
+        <StatCards summary={summary} />
 
         {/* Tab View Content */}
         {activeTab === 'trips' && (
@@ -197,18 +201,6 @@ export default function App() {
       {selectedTrip && (
         <TripDetailModal trip={selectedTrip} onClose={() => setSelectedTrip(null)} />
       )}
-
-      {/* Minimal Footer */}
-      <footer className="app-footer">
-        <div className="footer-inner">
-          <span>
-            Mainframe-Based Ride Analytics & Management System — IBM z/OS Batch Pipeline
-          </span>
-          <span className="mono">
-            FastAPI / JCL / REXX Connection Ready
-          </span>
-        </div>
-      </footer>
     </div>
   );
 }
