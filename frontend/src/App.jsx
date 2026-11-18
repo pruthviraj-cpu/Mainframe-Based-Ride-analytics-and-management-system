@@ -19,7 +19,7 @@ import {
   USE_MOCK,
 } from './services/api';
 
-import { List, Users, BarChart3, GitFork, Terminal, CheckCircle2, Database } from 'lucide-react';
+import { List, Users, BarChart3, GitFork, Terminal, CheckCircle2 } from 'lucide-react';
 import './App.css';
 
 export default function App() {
@@ -139,13 +139,6 @@ export default function App() {
                 LIVE
               </span>
             </button>
-          </div>
-
-          <div className="nav-right-meta">
-            <Database size={15} className="meta-icon" />
-            <span className="mono meta-format">LRECL=80 • RECFM=FB</span>
-            <span className="meta-divider">|</span>
-            <span className="meta-subtext">IBM z/OS Sequential Data</span>
           </div>
         </nav>
 

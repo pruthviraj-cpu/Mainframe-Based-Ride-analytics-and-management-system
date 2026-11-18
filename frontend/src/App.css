@@ -308,37 +308,40 @@
 .dashboard-navbar {
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  gap: 16px;
+  width: 100%;
   background-color: var(--bg-surface);
   border: 1px solid var(--border-light);
   border-radius: var(--radius-lg);
-  padding: 8px 12px;
+  padding: 6px;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04), 0 1px 2px rgba(0, 0, 0, 0.02);
   box-sizing: border-box;
-  margin-bottom: 4px;
+  overflow-x: auto;
 }
 
 .nav-tabs-group {
-  display: inline-flex;
+  display: flex;
   align-items: center;
-  gap: 6px;
-  flex-wrap: wrap;
+  gap: 8px;
+  flex-wrap: nowrap;
+  width: 100%;
 }
 
 .nav-tab-btn {
-  height: 44px;
+  flex: 1;
+  min-width: max-content;
+  height: 42px;
   display: inline-flex;
   align-items: center;
-  gap: 10px;
-  padding: 0 18px;
+  justify-content: center;
+  gap: 8px;
+  padding: 0 16px;
   border-radius: var(--radius-md);
-  font-size: 14px;
+  font-size: 13.5px;
   font-weight: 500;
   color: var(--text-secondary);
   background-color: transparent;
   border: 1px solid transparent;
-  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: all 0.18s cubic-bezier(0.4, 0, 0.2, 1);
   cursor: pointer;
   white-space: nowrap;
   box-sizing: border-box;
@@ -350,11 +353,11 @@
 }
 
 .nav-tab-btn.active {
-  background-color: var(--bg-surface);
+  background-color: #ffffff;
   color: #0284c7;
-  font-weight: 700;
+  font-weight: 600;
   border-color: #cbd5e1;
-  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.06), 0 1px 2px rgba(0, 0, 0, 0.04);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06), 0 1px 2px rgba(0, 0, 0, 0.03);
 }
 
 .nav-tab-icon {
@@ -373,7 +376,7 @@
   border-radius: var(--radius-full);
   background-color: #E2E8F0;
   color: var(--text-secondary);
-  transition: all 0.2s ease;
+  transition: all 0.18s ease;
 }
 
 .nav-tab-btn.active .nav-tab-badge {
@@ -409,39 +412,6 @@
   0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(22, 163, 74, 0.7); }
   70% { transform: scale(1); box-shadow: 0 0 0 4px rgba(22, 163, 74, 0); }
   100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(22, 163, 74, 0); }
-}
-
-.nav-right-meta {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  padding: 8px 16px;
-  background-color: var(--bg-subtle);
-  border: 1px solid var(--border-light);
-  border-radius: var(--radius-md);
-  font-size: 12px;
-  white-space: nowrap;
-}
-
-.meta-icon {
-  color: #0284c7;
-  flex-shrink: 0;
-}
-
-.meta-format {
-  font-size: 12px;
-  font-weight: 700;
-  color: var(--text-primary);
-  letter-spacing: 0.02em;
-}
-
-.meta-divider {
-  color: #cbd5e1;
-}
-
-.meta-subtext {
-  color: var(--text-secondary);
-  font-weight: 500;
 }
 
 .tabs-right-meta {

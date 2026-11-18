@@ -1,7 +1,7 @@
 {
-  "job_id": "JOB02245",
+  "job_id": "JOB02404",
   "return_code": "CC 0000",
-  "timestamp": "2026-11-18 07:12:51 UTC",
+  "timestamp": "2026-11-18 07:51:02 UTC",
   "environment": "IBM z/OS V2R5 / Enterprise COBOL 6.5.0 / DFSORT / TSO REXX",
   "system_node": "SVSCJES2 (System S0W1)",
   "logs": [
@@ -11,7 +11,7 @@
     "\n[STEP 1] Uploading raw input files to z/OS datasets...",
     "  Successfully uploaded raw telemetry to Z72234.RIDE.FILE1.RAW and Z72234.RIDE.FILE2.RAW",
     "\n[STEP 2] Submitting JCL/MASTERWF.jcl to z/OS JES2 queue...",
-    "  Mainframe Job: JOB02245 | Status: OUTPUT | Return Code: CC 0000",
+    "  Mainframe Job: JOB02404 | Status: OUTPUT | Return Code: CC 0000",
     "\n[STEP 3] Downloading mainframe-computed datasets back to local datastore...",
     "  Downloaded Z72234.RIDE.FILE1.SORTED -> FILE1_SORTED.ps [SUCCESS]",
     "  Downloaded Z72234.RIDE.FILE2.SORTED -> FILE2_SORTED.ps [SUCCESS]",
