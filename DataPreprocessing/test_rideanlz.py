@@ -61,8 +61,19 @@ class TripRecord:
             # COBOL PIC 9(4)V99: 6 chars, implied decimal, e.g. "001234" = 12.34
             raw_dist = r[26:32].strip()
             raw_fare = r[32:38].strip()
-            self.distance   = int(raw_dist) / 100.0 if raw_dist.isdigit() else 0.0
-            self.total_fare = int(raw_fare) / 100.0 if raw_fare.isdigit() else 0.0
+            if '.' in raw_dist:
+                self.distance = float(raw_dist)
+            elif raw_dist.isdigit():
+                self.distance = int(raw_dist) / 100.0
+            else:
+                self.distance = 0.0
+
+            if '.' in raw_fare:
+                self.total_fare = float(raw_fare)
+            elif raw_fare.isdigit():
+                self.total_fare = int(raw_fare) / 100.0
+            else:
+                self.total_fare = 0.0
         except (ValueError, IndexError):
             pass
         return self

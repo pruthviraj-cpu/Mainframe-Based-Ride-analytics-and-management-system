@@ -1,16 +1,22 @@
 ================================================================================
-      MAINFRAME-BASED RIDE ANALYTICS & MANAGEMENT SYSTEM - COBOL RIDEANLZ       
+NYC TAXI RIDE ANALYTICS - BATCH SUMMARY REPORT
 ================================================================================
+Total Trips Processed:                 89
+Total Fraud Trips Caught:               1
+Total Platform Revenue:         $378.28
 
-  TOTAL CLEAN TRIPS PROCESSED:              90
-  TOTAL FRAUDULENT TRIPS FLAGGED:             0
-  TOTAL PLATFORM COMMISSION (20%):  $    303.26
-  TOTAL DRIVER DISBURSEMENTS (80%): $   1213.07
+Unmatched FILE1 (no driver):            0
+Unmatched FILE2 (no trip):             15
 
---------------------------------------------------------------------------------
-  PREDICTIVE ANALYTICS: TOP 3 HOTTEST DROPOFF ZONES (DRIVER ALLOCATION ADVISORY)
---------------------------------------------------------------------------------
-  RANK 1: ZONE ID 048 - 8 DROPOFFS (SURGE ALLOCATION RECOMMENDED)
-  RANK 2: ZONE ID 239 - 5 DROPOFFS (SURGE ALLOCATION RECOMMENDED)
-  RANK 3: ZONE ID 238 - 5 DROPOFFS (SURGE ALLOCATION RECOMMENDED)
+================================================================================
+  TOP 3 MOST POPULAR DROPOFF ZONES (DRIVER ROUTING)
+================================================================================
+  RANK  DROPOFF ZONE ID    TRIP COUNT   NOTES
+
+  1     48                   8   RECOMMENDATION: ALLOCATE IDLE DRIVERS
+  2    238                   5
+  3    239                   5
+
+================================================================================
+  *** END OF REPORT - RIDEANLZ BATCH COMPLETE ***
 ================================================================================

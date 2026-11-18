@@ -38,8 +38,12 @@ do i = 1 to trips.0
             zone_list = zone_list zone_id
 
         zone_count.zone_id = zone_count.zone_id + 1
-        if datatype(fare, 'NUM') then
-            zone_total_fare.zone_id = format(zone_total_fare.zone_id + fare, , 2)
+        if datatype(fare, 'NUM') then do
+            if pos('.', fare) = 0 & length(fare) >= 3 then
+                fare = fare / 100
+            zone_total_fare.zone_id = ,
+                format(zone_total_fare.zone_id + fare, , 2)
+        end
     end
 end
 
@@ -49,7 +53,9 @@ end
 rpt.1 = center("--- NYC TAXI RIDE ANALYTICS: SURGE PRICING REPORT ---", 80)
 rpt.2 = center("DYNAMIC DEMAND MONITORING SYSTEM", 80)
 rpt.3 = copies("-", 80)
-rpt.4 = left("ZONE ID  | RIDE DEMAND | SURGE STATUS | MULTIPLIER | AVG BASE FARE", 80)
+hdr = "ZONE ID  | RIDE DEMAND | SURGE STATUS | " || ,
+      "MULTIPLIER | AVG BASE FARE"
+rpt.4 = left(hdr, 80)
 rpt.5 = copies("-", 80)
 
 line_idx = 5
@@ -82,7 +88,10 @@ do k = 1 to words(zone_list)
     end
 
     line_idx = line_idx + 1
-    rpt.line_idx = left("Zone " || right(zid, 3, '0') || " | " || right(demand, 11) || " | " || status || " | " || right(multiplier, 10) || " | $" || right(avg_fare, 12), 80)
+    row = "Zone " || right(zid, 3, '0') || " | " || ,
+          right(demand, 11) || " | " || status || " | " || ,
+          right(multiplier, 10) || " | $" || right(avg_fare, 12)
+    rpt.line_idx = left(row, 80)
 end
 
 line_idx = line_idx + 1
@@ -90,7 +99,8 @@ rpt.line_idx = copies("-", 80)
 line_idx = line_idx + 1
 rpt.line_idx = left("Total Unique Zones Monitored: " || words(zone_list), 80)
 line_idx = line_idx + 1
-rpt.line_idx = left("Total High-Demand Surging Zones: " || total_surging_zones, 80)
+msg = "Total High-Demand Surging Zones: " || total_surging_zones
+rpt.line_idx = left(msg, 80)
 line_idx = line_idx + 1
 rpt.line_idx = center("--- END OF REPORT ---", 80)
 
