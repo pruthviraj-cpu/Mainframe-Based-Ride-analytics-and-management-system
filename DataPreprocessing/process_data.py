@@ -169,20 +169,36 @@ def run_batch_pipeline(speed_threshold: float = 85.0, min_fare_threshold: float 
             pickup_zone = r1[20:23].strip().zfill(3)
             dropoff_zone = r1[23:26].strip().zfill(3)
 
+            dist_str = r1[26:32].strip()
+            fare_str = r1[32:38].strip()
+
             try:
-                distance_float = float(r1[26:32].strip())
+                if "." in dist_str:
+                    distance_float = float(dist_str)
+                else:
+                    distance_float = float(dist_str) / 100.0
             except ValueError:
                 distance_float = 0.0
 
             try:
-                fare_float = float(r1[32:38].strip())
+                if "." in fare_str:
+                    fare_float = float(fare_str)
+                else:
+                    fare_float = float(fare_str) / 100.0
             except ValueError:
                 fare_float = 0.0
 
             driver_id = r2[0:8].strip()
             duration_str = r2[28:33].strip().replace("MN", "")
             try:
-                duration_mins = float(duration_str)
+                if "." in duration_str:
+                    duration_mins = float(duration_str)
+                elif len(duration_str) >= 4:
+                    # COBOL PIC 9(3)V99 e.g. 00951 -> 9.51 mins
+                    duration_mins = float(duration_str) / 100.0
+                else:
+                    # e.g. 009 -> 9 mins
+                    duration_mins = float(duration_str)
             except ValueError:
                 duration_mins = 1.0
 
