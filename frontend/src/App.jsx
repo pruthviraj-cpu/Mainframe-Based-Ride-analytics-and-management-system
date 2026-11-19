@@ -6,7 +6,7 @@ import TripDetailModal from './components/TripDetailModal';
 import FileUploadModal from './components/FileUploadModal';
 import DriversView from './components/DriversView';
 import AnalyticsView from './components/AnalyticsView';
-import MainframePipelineView from './components/MainframePipelineView';
+import AiAnalyticsView from './components/AiAnalyticsView';
 import MainframeConsoleView from './components/MainframeConsoleView';
 
 import {
@@ -19,7 +19,7 @@ import {
   USE_MOCK,
 } from './services/api';
 
-import { List, Users, BarChart3, GitFork, Terminal, CheckCircle2 } from 'lucide-react';
+import { List, Users, BarChart3, Sparkles, Terminal, CheckCircle2 } from 'lucide-react';
 import './App.css';
 
 export default function App() {
@@ -120,11 +120,12 @@ export default function App() {
 
             <button
               type="button"
-              className={`nav-tab-btn ${activeTab === 'pipeline' ? 'active' : ''}`}
-              onClick={() => setActiveTab('pipeline')}
+              className={`nav-tab-btn ${activeTab === 'ai-analytics' ? 'active' : ''}`}
+              onClick={() => setActiveTab('ai-analytics')}
             >
-              <GitFork size={17} className="nav-tab-icon" />
-              <span className="nav-tab-label">Mainframe Pipeline</span>
+              <Sparkles size={17} className="nav-tab-icon nav-sparkle-icon" />
+              <span className="nav-tab-label">AI Fleet Intelligence</span>
+              <span className="nav-ai-gemini-badge">Gemini</span>
             </button>
 
             <button
@@ -170,11 +171,10 @@ export default function App() {
           />
         )}
 
-        {activeTab === 'pipeline' && (
-          <MainframePipelineView
-            jobs={jobs}
+        {activeTab === 'ai-analytics' && (
+          <AiAnalyticsView
             summary={summary}
-            onOpenConsole={() => setActiveTab('console')}
+            onSelectZone={handleZoneSelect}
           />
         )}
 

@@ -28,6 +28,7 @@ from DataPreprocessing.datastore import (
 )
 from DataPreprocessing.process_data import run_batch_pipeline
 from DataPreprocessing.mainframe_bridge import get_mainframe_status
+from backend.ai_service import get_fleet_ai_analytics
 
 app = FastAPI(
     title="Mainframe Ride Analytics API",
@@ -155,6 +156,23 @@ def query_vsam_trip(trip_id: str = Query(..., description="Trip Primary Key e.g.
     Performs direct O(1) keyed random retrieval against the VSAM KSDS master ledger cluster.
     """
     return MainframeDataStore.get_trip_by_key(trip_id)
+
+
+@app.get("/api/ai/analytics")
+def get_ai_analytics_endpoint(refresh: bool = Query(False, description="Force recalculation via Google Gemini")):
+    """
+    Returns AI-powered fleet mobility intelligence, spatial-temporal demand analysis,
+    peak hour interpretation, and predictive driver allocation recommendations powered by Google Gemini.
+    """
+    return get_fleet_ai_analytics(force_refresh=refresh)
+
+
+@app.post("/api/ai/refresh")
+def refresh_ai_analytics_endpoint():
+    """
+    Forces immediate regeneration of AI fleet intelligence via Google Gemini API.
+    """
+    return get_fleet_ai_analytics(force_refresh=True)
 
 
 @app.get("/api/mainframe/jobs")
