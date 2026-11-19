@@ -63,6 +63,10 @@ do forever
       "BROWSE DATASET('Z73984.RIDE.FILE3.LEDGER')"
     end
 
+    when zcmd = "9" then do
+      "BROWSE DATASET('Z73984.RIDE.FILE3.VSAM')"
+    end
+
     when zcmd = "X" | zcmd = "EXIT" then leave
 
     otherwise nop

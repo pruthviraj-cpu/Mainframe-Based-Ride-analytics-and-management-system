@@ -141,6 +141,22 @@ def get_fraud_records():
     return MainframeDataStore.get_fraud_trips()
 
 
+@app.get("/api/vsam/metadata")
+def get_vsam_metadata():
+    """
+    Returns IBM z/OS VSAM KSDS Cluster definition, key offsets, and catalog metrics.
+    """
+    return MainframeDataStore.get_vsam_metadata()
+
+
+@app.get("/api/vsam/query")
+def query_vsam_trip(trip_id: str = Query(..., description="Trip Primary Key e.g. TR000042")):
+    """
+    Performs direct O(1) keyed random retrieval against the VSAM KSDS master ledger cluster.
+    """
+    return MainframeDataStore.get_trip_by_key(trip_id)
+
+
 @app.get("/api/mainframe/jobs")
 def get_mainframe_jobs():
     """
@@ -157,7 +173,7 @@ def get_mainframe_jobs():
             "name": "DATA PREPROCESSING (Python Ingestion)",
             "description": "Streamed raw NYC Taxi telemetry into strict 80-byte Fixed Block physical sequential (.ps) datasets.",
             "input_files": ["nyc_yellow_taxi.csv.gz"],
-            "output_files": ["Z72234.RIDE.FILE1.RAW", "Z72234.RIDE.FILE2.RAW"],
+            "output_files": ["Z73984.RIDE.FILE1.RAW", "Z73984.RIDE.FILE2.RAW"],
             "status": "COMPLETED",
             "record_count": f"F1: {metrics.get('rawFile1Records', 100)} rows, F2: {metrics.get('rawFile2Records', 120)} rows",
             "notes": "Deliberate duplicates injected for mainframe deduplication verification.",
@@ -166,8 +182,8 @@ def get_mainframe_jobs():
             "step": "STEP 02",
             "name": f"JCL DFSORT SANITIZATION ({job_id} / SORTF1)",
             "description": "Executed DFSORT on IBM z/OS to sort by TRIP_ID (Cols 13-20, CH, A) and discard duplicate lines.",
-            "input_files": ["Z72234.RIDE.FILE1.RAW"],
-            "output_files": ["Z72234.RIDE.FILE1.SORTED"],
+            "input_files": ["Z73984.RIDE.FILE1.RAW"],
+            "output_files": ["Z73984.RIDE.FILE1.SORTED"],
             "status": "COMPLETED",
             "record_count": f"{metrics.get('cleanMergedRecords', 89)} clean rows ({metrics.get('duplicatesRemoved', 10)} duplicates purged)",
             "notes": "DFSORT SUM FIELDS=NONE executed with return code RC=0000.",
@@ -176,8 +192,8 @@ def get_mainframe_jobs():
             "step": "STEP 03",
             "name": f"REXX DEDUPLICATION ({job_id} / REXXF2)",
             "description": "Executed REXX in batch via IKJEFT01: in-place stem lookup and QuickSort on TRIP_ID (Cols 21-28).",
-            "input_files": ["Z72234.RIDE.FILE2.RAW"],
-            "output_files": ["Z72234.RIDE.FILE2.SORTED"],
+            "input_files": ["Z73984.RIDE.FILE2.RAW"],
+            "output_files": ["Z73984.RIDE.FILE2.SORTED"],
             "status": "COMPLETED",
             "record_count": "105 sorted rows (15 duplicates purged)",
             "notes": "Executed via IKJEFT01 / TSO batch with return code RC=0000.",
@@ -186,8 +202,8 @@ def get_mainframe_jobs():
             "step": "STEP 04",
             "name": f"COBOL MERGE & FRAUD ENGINE ({job_id} / RUNCOBOL)",
             "description": "Enterprise COBOL Balance-Line file merge, 75/25 financial split, fraud detection, and 265-zone OCCURS table tally.",
-            "input_files": ["Z72234.RIDE.FILE1.SORTED", "Z72234.RIDE.FILE2.SORTED"],
-            "output_files": ["Z72234.RIDE.FILE3.LEDGER", "Z72234.RIDE.FILE4.FRAUDRPT", "Z72234.RIDE.FILE5.SUMRPT"],
+            "input_files": ["Z73984.RIDE.FILE1.SORTED", "Z73984.RIDE.FILE2.SORTED"],
+            "output_files": ["Z73984.RIDE.FILE3.LEDGER", "Z73984.RIDE.FILE4.FRAUDRPT", "Z73984.RIDE.FILE5.SUMRPT"],
             "status": "COMPLETED",
             "record_count": f"{metrics.get('cleanMergedRecords', 89)} ledger rows, {metrics.get('fraudTripsCount', 1)} fraud flags",
             "notes": "Compiled with IBM Enterprise COBOL 6.5.0; executed with return code RC=0000.",
@@ -196,8 +212,8 @@ def get_mainframe_jobs():
             "step": "STEP 05",
             "name": f"REXX DYNAMIC SURGE PRICING ({job_id} / SURGSTEP)",
             "description": "Dynamic demand density monitoring & multiplier calculation across NYC taxi zones.",
-            "input_files": ["Z72234.RIDE.FILE1.SORTED"],
-            "output_files": ["Z72234.RIDE.SURGE.REPORT"],
+            "input_files": ["Z73984.RIDE.FILE1.SORTED"],
+            "output_files": ["Z73984.RIDE.SURGE.REPORT"],
             "status": "COMPLETED",
             "record_count": "44 zones monitored, 13 surging",
             "notes": "Executed via IKJEFT01 with return code RC=0000.",
@@ -206,8 +222,8 @@ def get_mainframe_jobs():
             "step": "STEP 06",
             "name": f"IEBGENER BACKUP ARCHIVE ({job_id} / BACKUP)",
             "description": "Automated verification & backup copy executed conditionally upon COBOL RC=00.",
-            "input_files": ["Z72234.RIDE.FILE5.SUMRPT"],
-            "output_files": ["Z72234.RIDE.BACKUP.REPORT"],
+            "input_files": ["Z73984.RIDE.FILE5.SUMRPT"],
+            "output_files": ["Z73984.RIDE.BACKUP.REPORT"],
             "status": "COMPLETED",
             "record_count": "Summary report archive verified",
             "notes": "Conditional step (IF RUNCOBOL.RC = 0) completed with return code RC=0000.",

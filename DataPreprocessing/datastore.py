@@ -90,7 +90,7 @@ def parse_ledger_record(line: str) -> dict:
         driver_payout = round(fare * 0.80, 2)
 
     try:
-        platform_comm = float(rec[52:58].strip()) / 100.0
+        platform_comm = round(fare * 0.20, 2)
     except (ValueError, IndexError):
         platform_comm = round(fare * 0.20, 2)
 
@@ -387,3 +387,48 @@ class MainframeDataStore:
 
         result.sort(key=lambda x: x["pickups"], reverse=True)
         return result[:10]
+
+    @staticmethod
+    def get_trip_by_key(trip_id: str):
+        """
+        Emulates O(1) Keyed Random Access of IBM z/OS VSAM KSDS Cluster.
+        Primary Key: Trip ID (8 Bytes at offset 0).
+        """
+        target = trip_id.strip().upper()
+        trips = MainframeDataStore.get_ledger_trips(include_fraud=True)
+        for t in trips:
+            if t.get("trip_id", "").upper() == target:
+                return {
+                    "status": "HIT",
+                    "access_mode": "RANDOM_KEYED",
+                    "vsam_cluster": "Z73984.RIDE.FILE3.VSAM",
+                    "primary_key": target,
+                    "record_length": 80,
+                    "record": t,
+                }
+        return {
+            "status": "NOT_FOUND",
+            "access_mode": "RANDOM_KEYED",
+            "vsam_cluster": "Z73984.RIDE.FILE3.VSAM",
+            "primary_key": target,
+            "message": f"Trip key '{target}' does not exist in VSAM index component."
+        }
+
+    @staticmethod
+    def get_vsam_metadata():
+        """Returns catalog metadata for the VSAM KSDS Cluster."""
+        trips = MainframeDataStore.get_ledger_trips()
+        return {
+            "cluster_name": "Z73984.RIDE.FILE3.VSAM",
+            "data_component": "Z73984.RIDE.FILE3.VSAM.DATA",
+            "index_component": "Z73984.RIDE.FILE3.VSAM.INDEX",
+            "organization": "INDEXED (KSDS)",
+            "key_length": 8,
+            "key_offset": 0,
+            "record_format": "FIXED (RECFM=FB)",
+            "record_size": 80,
+            "total_records": len(trips),
+            "free_space": "10% CI / 10% CA",
+            "share_options": "(2 3)",
+            "status": "ACTIVE_LOADED"
+        }

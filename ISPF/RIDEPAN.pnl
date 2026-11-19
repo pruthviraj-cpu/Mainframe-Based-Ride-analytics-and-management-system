@@ -19,10 +19,11 @@
 %   6 +VIEW EXECUTION AUDIT LOG +Browse step-by-step pipeline logs
 %   7 +EXECUTE PIPELINE BATCH   +Submit end-to-end batch job to JES2
 %   8 +RAW FIXED PS DATASET     +Browse raw 80-byte master ledger (FILE3)
+%   9 +VSAM KSDS DIRECT INDEX   +Browse / Query indexed VSAM cluster
 +
 %   X +EXIT                     +Return to ISPF Primary Menu
 %----------------------------------------------------------------------------
-+Select option (1-8) or%X+to exit. Press%ENTER+to view.
++Select option (1-9) or%X+to exit. Press%ENTER+to view.
 )INIT
   .CURSOR = ZCMD
   &ZCMD = ' '

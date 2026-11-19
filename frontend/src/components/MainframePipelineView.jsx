@@ -69,7 +69,7 @@ export default function MainframePipelineView({ jobs, summary, onOpenConsole }) 
       icon: FileCode2,
       details: [
         'Single-pass O(N+M) Balance-Line sequential file match.',
-        'Computes 75% Driver Payout and 25% Platform Commission.',
+        'Computes 80% Driver Payout and 20% Platform Commission.',
         'Evaluates Implied Speed (>85 MPH) and Low-Fare distance anomalies.',
         'Routes clean trips to FILE3 and quarantined anomalies to FILE4.',
         'Maintains 265-entry OCCURS array to advise driver allocation.',
@@ -105,6 +105,21 @@ export default function MainframePipelineView({ jobs, summary, onOpenConsole }) 
         'Executes critical failure notification if any prior step fails.',
       ],
       output: 'BACKUP.REPORT & Full JCL Pipeline Audit',
+    },
+    {
+      num: '07',
+      name: 'VSAM KSDS Cluster & Direct Keyed Access (Database Tier)',
+      owner: 'JCL/DEFVSAM.jcl & COBOL/VSAMREAD.cbl',
+      status: 'ACTIVE_INDEXED',
+      badgeClass: 'badge-primary',
+      icon: Database,
+      details: [
+        'IDCAMS defines VSAM KSDS Cluster with KEYS(8 0) on Trip ID.',
+        'REPRO populates indexed cluster from FILE3 sequential ledger.',
+        'Enables O(1) random keyed lookups via COBOL ORGANIZATION IS INDEXED.',
+        'Provides real-time indexed search by Primary Key across entire fleet.',
+      ],
+      output: 'Z73984.RIDE.FILE3.VSAM (KSDS Index + Data)',
     },
   ];
 

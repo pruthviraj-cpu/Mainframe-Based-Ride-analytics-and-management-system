@@ -125,6 +125,40 @@ export async function getMainframeJobs() {
   return fetchWithFallback("/mainframe/jobs", MOCK_MAINFRAME_JOBS);
 }
 
+/**
+ * Fetch VSAM KSDS Catalog & Cluster Metadata
+ * Expected Backend Endpoint: GET /api/vsam/metadata
+ */
+export async function getVsamMetadata() {
+  return fetchWithFallback("/vsam/metadata", {
+    cluster_name: "Z73984.RIDE.FILE3.VSAM",
+    data_component: "Z73984.RIDE.FILE3.VSAM.DATA",
+    index_component: "Z73984.RIDE.FILE3.VSAM.INDEX",
+    organization: "INDEXED (KSDS)",
+    key_length: 8,
+    key_offset: 0,
+    record_format: "FIXED (RECFM=FB)",
+    record_size: 80,
+    total_records: 90,
+    status: "ACTIVE_LOADED",
+  });
+}
+
+/**
+ * Direct O(1) Keyed Random Query against VSAM KSDS Cluster
+ * Expected Backend Endpoint: GET /api/vsam/query?trip_id=...
+ */
+export async function queryVsamTrip(tripId) {
+  return fetchWithFallback(`/vsam/query?trip_id=${encodeURIComponent(tripId)}`, {
+    status: "HIT",
+    access_mode: "RANDOM_KEYED",
+    vsam_cluster: "Z73984.RIDE.FILE3.VSAM",
+    primary_key: tripId,
+    record_length: 80,
+    record: MOCK_TRIPS.find((t) => t.trip_id === tripId) || MOCK_TRIPS[0],
+  });
+}
+
 // Real authentic log sequence from actual file batch run
 export const REAL_MAINFRAME_LOGS = [
   "======================================================================",

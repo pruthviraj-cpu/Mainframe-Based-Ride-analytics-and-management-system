@@ -1,7 +1,7 @@
 {
-  "job_id": "JOB02404",
-  "return_code": "CC 0000",
-  "timestamp": "2026-11-18 07:51:02 UTC",
+  "job_id": "JOB07615",
+  "return_code": "JCL ERROR",
+  "timestamp": "2026-11-19 06:11:00 UTC",
   "environment": "IBM z/OS V2R5 / Enterprise COBOL 6.5.0 / DFSORT / TSO REXX",
   "system_node": "SVSCJES2 (System S0W1)",
   "logs": [
@@ -9,16 +9,16 @@
     "EXECUTING BUSINESS LOGIC ON IBM z/OS MAINFRAME (JCL / REXX / COBOL)",
     "======================================================================",
     "\n[STEP 1] Uploading raw input files to z/OS datasets...",
-    "  Successfully uploaded raw telemetry to Z72234.RIDE.FILE1.RAW and Z72234.RIDE.FILE2.RAW",
+    "  Warning: Upload returned code 1/1. Continuing with existing mainframe datasets.",
     "\n[STEP 2] Submitting JCL/MASTERWF.jcl to z/OS JES2 queue...",
-    "  Mainframe Job: JOB02404 | Status: OUTPUT | Return Code: CC 0000",
+    "  Mainframe Job: JOB07615 | Status: OUTPUT | Return Code: JCL ERROR",
     "\n[STEP 3] Downloading mainframe-computed datasets back to local datastore...",
-    "  Downloaded Z72234.RIDE.FILE1.SORTED -> FILE1_SORTED.ps [SUCCESS]",
-    "  Downloaded Z72234.RIDE.FILE2.SORTED -> FILE2_SORTED.ps [SUCCESS]",
-    "  Downloaded Z72234.RIDE.FILE3.LEDGER -> FILE3_MASTER_LEDGER.ps [SUCCESS]",
-    "  Downloaded Z72234.RIDE.FILE4.FRAUDRPT -> FILE4_FRAUD_REPORT.ps [SUCCESS]",
-    "  Downloaded Z72234.RIDE.FILE5.SUMRPT -> FILE5_SUMMARY_RPT.txt [SUCCESS]",
-    "  Downloaded Z72234.RIDE.SURGE.REPORT -> RIDE_SURGE_REPORT.txt [SUCCESS]"
+    "  Downloaded Z73984.RIDE.FILE1.SORTED -> FILE1_SORTED.ps [FAILED]",
+    "  Downloaded Z73984.RIDE.FILE2.SORTED -> FILE2_SORTED.ps [FAILED]",
+    "  Downloaded Z73984.RIDE.FILE3.LEDGER -> FILE3_MASTER_LEDGER.ps [FAILED]",
+    "  Downloaded Z73984.RIDE.FILE4.FRAUDRPT -> FILE4_FRAUD_REPORT.ps [FAILED]",
+    "  Downloaded Z73984.RIDE.FILE5.SUMRPT -> FILE5_SUMMARY_RPT.txt [FAILED]",
+    "  Downloaded Z73984.RIDE.SURGE.REPORT -> RIDE_SURGE_REPORT.txt [FAILED]"
   ],
   "steps": [
     {
@@ -26,7 +26,7 @@
       "name": "JCL DFSORT SANITIZATION (SORTF1.jcl)",
       "technology": "DFSORT (PGM=SORT)",
       "description": "Mainframe sort & dedup: Sorts Cols 13-20 (Trip ID) ascending with SUM FIELDS=NONE.",
-      "output": "Z72234.RIDE.FILE1.SORTED",
+      "output": "Z73984.RIDE.FILE1.SORTED",
       "return_code": "RC=0000",
       "status": "COMPLETED"
     },
@@ -35,7 +35,7 @@
       "name": "REXX DRIVER DEDUPLICATION (DEDUPF2.rexx)",
       "technology": "TSO/E REXX (IKJEFT01)",
       "description": "Associative stem lookup on Cols 21-28 with in-place QuickSort on IBM z/OS.",
-      "output": "Z72234.RIDE.FILE2.SORTED",
+      "output": "Z73984.RIDE.FILE2.SORTED",
       "return_code": "RC=0000",
       "status": "COMPLETED"
     },
@@ -44,7 +44,7 @@
       "name": "COBOL BALANCE-LINE MERGE & FRAUD (RIDEANLZ.cbl)",
       "technology": "Enterprise COBOL for z/OS (PGM=RIDEANLZ)",
       "description": "Matches Trip & Driver files, computes 75/25 financial split, evaluates speed/low-fare fraud, and tallies 265 dropoff zones.",
-      "output": "Z72234.RIDE.FILE3.LEDGER, FILE4.FRAUDRPT, FILE5.SUMRPT",
+      "output": "Z73984.RIDE.FILE3.LEDGER, FILE4.FRAUDRPT, FILE5.SUMRPT",
       "return_code": "RC=0000",
       "status": "COMPLETED"
     },
@@ -53,7 +53,7 @@
       "name": "REXX DYNAMIC SURGE PRICING (SURGEPRC.rexx)",
       "technology": "TSO/E REXX (IKJEFT01)",
       "description": "Dynamic demand density monitoring & multiplier calculation across NYC taxi zones.",
-      "output": "Z72234.RIDE.SURGE.REPORT",
+      "output": "Z73984.RIDE.SURGE.REPORT",
       "return_code": "RC=0000",
       "status": "COMPLETED"
     },
@@ -62,7 +62,7 @@
       "name": "IEBGENER BACKUP ARCHIVE (MASTERWF.jcl)",
       "technology": "IEBGENER (PGM=IEBGENER)",
       "description": "Automated verification & backup copy executed conditionally upon COBOL RC=00.",
-      "output": "Z72234.RIDE.BACKUP.REPORT",
+      "output": "Z73984.RIDE.BACKUP.REPORT",
       "return_code": "RC=0000",
       "status": "COMPLETED"
     }

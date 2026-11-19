@@ -75,16 +75,16 @@ def run_mainframe_pipeline(file1_path=None, file2_path=None):
     log("\n[STEP 1] Uploading raw input files to z/OS datasets...")
     rc1, out1, err1 = run_cmd([
         "zowe", "zos-files", "upload", "file-to-data-set",
-        f1_in, "Z72234.RIDE.FILE1.RAW"
+        f1_in, "Z73984.RIDE.FILE1.RAW"
     ])
     rc2, out2, err2 = run_cmd([
         "zowe", "zos-files", "upload", "file-to-data-set",
-        f2_in, "Z72234.RIDE.FILE2.RAW"
+        f2_in, "Z73984.RIDE.FILE2.RAW"
     ])
     if rc1 != 0 or rc2 != 0:
         log(f"  Warning: Upload returned code {rc1}/{rc2}. Continuing with existing mainframe datasets.")
     else:
-        log("  Successfully uploaded raw telemetry to Z72234.RIDE.FILE1.RAW and Z72234.RIDE.FILE2.RAW")
+        log("  Successfully uploaded raw telemetry to Z73984.RIDE.FILE1.RAW and Z73984.RIDE.FILE2.RAW")
 
     # Step 2: Submit Master Conditional Workflow JCL to JES2
     log("\n[STEP 2] Submitting JCL/MASTERWF.jcl to z/OS JES2 queue...")
@@ -112,12 +112,12 @@ def run_mainframe_pipeline(file1_path=None, file2_path=None):
     # Step 3: Download Cleaned, Merged, and Calculated Datasets
     log("\n[STEP 3] Downloading mainframe-computed datasets back to local datastore...")
     downloads = [
-        ("Z72234.RIDE.FILE1.SORTED", FILE1_SORTED),
-        ("Z72234.RIDE.FILE2.SORTED", FILE2_SORTED),
-        ("Z72234.RIDE.FILE3.LEDGER", FILE3_LEDGER),
-        ("Z72234.RIDE.FILE4.FRAUDRPT", FILE4_FRAUD),
-        ("Z72234.RIDE.FILE5.SUMRPT", FILE5_SUMMARY),
-        ("Z72234.RIDE.SURGE.REPORT", FILE_SURGE),
+        ("Z73984.RIDE.FILE1.SORTED", FILE1_SORTED),
+        ("Z73984.RIDE.FILE2.SORTED", FILE2_SORTED),
+        ("Z73984.RIDE.FILE3.LEDGER", FILE3_LEDGER),
+        ("Z73984.RIDE.FILE4.FRAUDRPT", FILE4_FRAUD),
+        ("Z73984.RIDE.FILE5.SUMRPT", FILE5_SUMMARY),
+        ("Z73984.RIDE.SURGE.REPORT", FILE_SURGE),
     ]
 
     for ds_name, target_file in downloads:
@@ -143,7 +143,7 @@ def run_mainframe_pipeline(file1_path=None, file2_path=None):
                 "name": "JCL DFSORT SANITIZATION (SORTF1.jcl)",
                 "technology": "DFSORT (PGM=SORT)",
                 "description": "Mainframe sort & dedup: Sorts Cols 13-20 (Trip ID) ascending with SUM FIELDS=NONE.",
-                "output": "Z72234.RIDE.FILE1.SORTED",
+                "output": "Z73984.RIDE.FILE1.SORTED",
                 "return_code": "RC=0000",
                 "status": "COMPLETED",
             },
@@ -152,7 +152,7 @@ def run_mainframe_pipeline(file1_path=None, file2_path=None):
                 "name": "REXX DRIVER DEDUPLICATION (DEDUPF2.rexx)",
                 "technology": "TSO/E REXX (IKJEFT01)",
                 "description": "Associative stem lookup on Cols 21-28 with in-place QuickSort on IBM z/OS.",
-                "output": "Z72234.RIDE.FILE2.SORTED",
+                "output": "Z73984.RIDE.FILE2.SORTED",
                 "return_code": "RC=0000",
                 "status": "COMPLETED",
             },
@@ -161,7 +161,7 @@ def run_mainframe_pipeline(file1_path=None, file2_path=None):
                 "name": "COBOL BALANCE-LINE MERGE & FRAUD (RIDEANLZ.cbl)",
                 "technology": "Enterprise COBOL for z/OS (PGM=RIDEANLZ)",
                 "description": "Matches Trip & Driver files, computes 75/25 financial split, evaluates speed/low-fare fraud, and tallies 265 dropoff zones.",
-                "output": "Z72234.RIDE.FILE3.LEDGER, FILE4.FRAUDRPT, FILE5.SUMRPT",
+                "output": "Z73984.RIDE.FILE3.LEDGER, FILE4.FRAUDRPT, FILE5.SUMRPT",
                 "return_code": "RC=0000",
                 "status": "COMPLETED",
             },
@@ -170,7 +170,7 @@ def run_mainframe_pipeline(file1_path=None, file2_path=None):
                 "name": "REXX DYNAMIC SURGE PRICING (SURGEPRC.rexx)",
                 "technology": "TSO/E REXX (IKJEFT01)",
                 "description": "Dynamic demand density monitoring & multiplier calculation across NYC taxi zones.",
-                "output": "Z72234.RIDE.SURGE.REPORT",
+                "output": "Z73984.RIDE.SURGE.REPORT",
                 "return_code": "RC=0000",
                 "status": "COMPLETED",
             },
@@ -179,7 +179,7 @@ def run_mainframe_pipeline(file1_path=None, file2_path=None):
                 "name": "IEBGENER BACKUP ARCHIVE (MASTERWF.jcl)",
                 "technology": "IEBGENER (PGM=IEBGENER)",
                 "description": "Automated verification & backup copy executed conditionally upon COBOL RC=00.",
-                "output": "Z72234.RIDE.BACKUP.REPORT",
+                "output": "Z73984.RIDE.BACKUP.REPORT",
                 "return_code": "RC=0000",
                 "status": "COMPLETED",
             },
